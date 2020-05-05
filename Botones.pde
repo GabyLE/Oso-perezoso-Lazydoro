@@ -1,5 +1,6 @@
 class Boton{
   
+  int Id;
   float posX;
   float posY;
   float cuadX;
@@ -8,10 +9,11 @@ class Boton{
   float heightCuad;
   
   PImage boton;
- 
+  
   boolean estadoON = false;
   
-  Boton(PImage tempBoton, float tempX, float tempY,float TcuadX, float TcuadY, float TwidthCuad, float TheightCuad) {
+  Boton(int tempId,PImage tempBoton, float tempX, float tempY,float TcuadX, float TcuadY, float TwidthCuad, float TheightCuad) {
+    Id = tempId;
     boton = tempBoton;
     posX = tempX;
     posY = tempY;

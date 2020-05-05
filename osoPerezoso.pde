@@ -1,26 +1,30 @@
 /*Aplicación: Presentación demostrativa del juego "OSO PEREZOSO" y componentes (control interactivo) 
   Autor: S.I.M. Soluciones de Ingeniería Mecánica
   Integrantes: Julio Largo, Gabriela López, Camilo Rivera, Sebastian Rivera, Carlos Soto
-  Fecha última modificación: 24/04/2020
+  Fecha última modificación: 03/05/2020
 */
 //DIRECTIVAS
 import processing.serial.*; //se importa la librería Serial para comunicación con Arduino
 import javafx.stage.Screen; //se importa recurso para la animación del logo
-
+//variables
+int timeOut = 0;
+int posicionEnSecuencia = 0;
+int [] secuencia = new int[5];
+boolean incorrecto = false;
+int tamActualSecuencia = 0;
+boolean turnoSimon = true;
 //Botones
 Boton [] botones = new Boton[5];
 
+//Sonido
+SimonTonoGenerador simonTonos;
+
 //Fuentes usadas
-//PFont titulo;
 PFont stamp;
 PFont dispositivo;
 
 //Imagenes
-//PImage[] Animacion_logo= new PImage[3];  // secuencia de imagenes
-//int i=0, tiempo1=0;
-//PImage Logo_univalle;
 PImage logo_stamp;
-//PImage arbol;
 PImage estrellaEncendido;
 PImage circuloEncendido;
 PImage trianguloEncendido;
@@ -28,7 +32,7 @@ PImage cuadradoEncendido;
 PImage corazonEncendido;
 PImage parlantes;
 
-//Diseño básico ventana
+//Diseño basico ventana
 Image [] imagen = new Image[5];
 Image titulo;
 PImage fondo;
@@ -40,12 +44,6 @@ void setup(){
   imagenes();
   //Cargar fuentes texto
   fuentesLetras();
-  //Botones
-  botones[0] = new Boton(estrellaEncendido,110,522,125,540,125,115);
-  botones[1] = new Boton(circuloEncendido,263,522,276,536,117,117);
-  botones[2] = new Boton(trianguloEncendido,415,522,428,536,117,117);
-  botones[3] = new Boton(cuadradoEncendido,591,522,601,536,117,117);
-  botones[4] = new Boton(corazonEncendido,758,522,766,536,117,117);
   //Diseño basico ventana
   imagen[0] = new Image(0,1000,700);//logo SIM
   imagen[1] = new Image(1,1000,700);//logo SIM
@@ -55,22 +53,125 @@ void setup(){
   titulo = new Image(0,0,0);
   //carga imagen de fondo
   fondo = loadImage("fondo-arbol.jpg");
+  //Botones
+  botones[0] = new Boton(0,estrellaEncendido,110,522,125,540,125,115);
+  botones[1] = new Boton(1,circuloEncendido,263,522,276,536,117,117);
+  botones[2] = new Boton(2,trianguloEncendido,415,522,428,536,117,117);
+  botones[3] = new Boton(3,cuadradoEncendido,591,522,601,536,117,117);
+  botones[4] = new Boton(4,corazonEncendido,758,522,766,536,117,117);
+  
+  simonTonos = new SimonTonoGenerador(this);
+  nuevaSecuencia();
 }
 
 //DIBUJO-CICLO INFINITO
 void draw(){
+  //muestra el diseño de la ventana
   disenoVentana();
+  //muestra el dispositivo
   disenoDispositivo();
-
-  //BOTONES
-  for(Boton botonActual : botones){
-    botonActual.mostrar();
-  }
-
+  //sonidos botones
+  simonTonos.checkSuenaTiempo();
+  
+  
+  if(simonTonos.estaSonando == false)apagaBoton();
+  
+  if (turnoSimon) muestraSecuencia();
+  
 }//Fin draw
+
+
 //FUNCIONES
+
+//Muestra secuencia
+void muestraSecuencia(){
+    if(millis() >= timeOut){
+      
+      int palabra = secuencia[posicionEnSecuencia];
+      simonTonos.suenaTono(palabra,420);
+      botones[palabra].estadoON = true;
+      
+      if(posicionEnSecuencia < tamActualSecuencia){
+        posicionEnSecuencia++;
+      }
+      else{
+        turnoSimon = false;
+        posicionEnSecuencia = 0;
+      }
+      //if(posicionEnSecuencia>=secuencia.length){
+      //  posicionEnSecuencia = 0;
+      ////}
+      timeOut = millis() + 420 + 55;
+  } 
+}
+
+//Botones presionados
+void mousePressed(){
+  if(turnoSimon == false){
+    for(Boton botonActual : botones){
+      if(botonActual.mouseSobre() == true){
+        botonActual.estadoON = true;
+        if(secuencia[posicionEnSecuencia] != botonActual.Id){
+          simonTonos.suenaTono(5,420);
+          incorrecto = true;
+        }
+        
+        else{
+          simonTonos.suenaTono(botonActual.Id,420);
+        }
+      }
+    }
+  }
+}
+
+//Soltar botones
+void mouseReleased(){
+  
+  if(turnoSimon == false){
+    
+    simonTonos.paraTono(); 
+    apagaBoton();
+    
+    if(incorrecto){
+      nuevaSecuencia();
+      incorrecto = false;
+    }
+    else{
+      if(posicionEnSecuencia < tamActualSecuencia){
+        posicionEnSecuencia++;
+        //println(posicionEnSecuencia);
+      }
+      else{
+       
+        tamActualSecuencia++;
+        posicionEnSecuencia = 0;
+        
+        timeOut = millis() + 1000;
+        turnoSimon = true;
+      }
+      
+    }
+  }
+  
+}
+void apagaBoton(){
+  for(Boton botonActual : botones){
+    botonActual.estadoON = false;
+  } 
+}
+
+void nuevaSecuencia(){
+  for(int i = 0; i < 5;i++ ){
+    secuencia[i] = int(random(0,5));
+  }
+  
+  posicionEnSecuencia = 0;
+  //printArray(simonSentence);
+  println(join(nf(secuencia, 0), ", "));
+}
 //Cargar imagenes y ajustar tamaño
 void imagenes(){
+  //carga las imagenes
   parlantes = loadImage("parlantes.png");
   logo_stamp=loadImage("SIM_stamp.png");
   estrellaEncendido = loadImage("estrella3.png");
@@ -88,52 +189,17 @@ void imagenes(){
   logo_stamp.resize(37,0);
   parlantes.resize(50,0);
 }
-
-//Fuentes de letras
 void fuentesLetras(){
   stamp = createFont("big_noodle_titling.ttf",20);
   dispositivo = createFont("KurriIslandCapsPERSONAL-Med.ttf",55);
 }
-//Funcion logo animado
-void Animacion_logo(int velocidad)
- {
-   if (tiempo1==velocidad)
-   {
-    i++;
-    tiempo1=0;
-   if (i==3)
-   {
-     i=0;
-   }
-   }
-   tiempo1++; 
- }
-
-//Botones presionados
-void mousePressed(){
-  for(Boton botonActual : botones){
-    if(botonActual.mouseSobre() == true){
-      botonActual.estadoON = true;
-    }
-  }
-}
-
-//Soltar botones
-void mouseReleased(){
-  for(Boton botonActual : botones){
-    botonActual.estadoON = false;
-  }  
-
-}
-
-//diseño basico ventana
 void disenoVentana(){
   titulo.cabezote();
   for(int i=0;i<imagen.length;i++){
     imagen[i].mostrar(fondo);
   }
 }
-
+//Diseño general ventana
 void disenoDispositivo(){
   //
   noStroke(); //sin contorno 
@@ -158,4 +224,8 @@ void disenoDispositivo(){
   fill(0,2,44);
   ellipse(764,498,67,67);
   image(parlantes,740,473);
+  //BOTONES
+  for(Boton botonActual : botones){
+    botonActual.mostrar();
+  }
 }
