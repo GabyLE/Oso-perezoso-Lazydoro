@@ -4,12 +4,11 @@
   Fecha última modificación: 03/05/2020
 */
 //DIRECTIVAS
-import processing.serial.*; //se importa la librería Serial para comunicación con Arduino
 import javafx.stage.Screen; //se importa recurso para la animación del logo
 //variables
 int timeOut = 0;
 int posicionEnSecuencia = 0;
-int [] secuencia = new int[5];
+int [] secuencia = new int[100];
 boolean incorrecto = false;
 int tamActualSecuencia = 0;
 boolean turnoSimon = true;
@@ -61,7 +60,7 @@ void setup(){
   botones[4] = new Boton(4,corazonEncendido,758,522,766,536,117,117);
   
   simonTonos = new SimonTonoGenerador(this);
-  nuevaSecuencia();
+  simonIniciaJuego();
 }
 
 //DIBUJO-CICLO INFINITO
@@ -70,10 +69,10 @@ void draw(){
   disenoVentana();
   //muestra el dispositivo
   disenoDispositivo();
+  
   //sonidos botones
   simonTonos.checkSuenaTiempo();
-  
-  
+    
   if(simonTonos.estaSonando == false)apagaBoton();
   
   if (turnoSimon) muestraSecuencia();
@@ -82,7 +81,12 @@ void draw(){
 
 
 //FUNCIONES
-
+//Inicia un nuevo juego
+void simonIniciaJuego(){
+  nuevaSecuencia();
+  timeOut = millis() +1000;
+  turnoSimon = true;
+}
 //Muestra secuencia
 void muestraSecuencia(){
     if(millis() >= timeOut){
@@ -101,7 +105,7 @@ void muestraSecuencia(){
       //if(posicionEnSecuencia>=secuencia.length){
       //  posicionEnSecuencia = 0;
       ////}
-      timeOut = millis() + 420 + 55;
+      timeOut = millis() + 420 + 50;
   } 
 }
 
@@ -133,7 +137,7 @@ void mouseReleased(){
     apagaBoton();
     
     if(incorrecto){
-      nuevaSecuencia();
+      simonIniciaJuego();
       incorrecto = false;
     }
     else{
@@ -142,12 +146,18 @@ void mouseReleased(){
         //println(posicionEnSecuencia);
       }
       else{
-       
-        tamActualSecuencia++;
-        posicionEnSecuencia = 0;
+        if(tamActualSecuencia == secuencia.length-1){
+          simonIniciaJuego();
+        }
+        else{
+          tamActualSecuencia++;
+          posicionEnSecuencia = 0;
         
-        timeOut = millis() + 1000;
-        turnoSimon = true;
+          timeOut = millis() + 1000;
+          turnoSimon = true;
+        }
+        
+        
       }
       
     }
@@ -161,10 +171,10 @@ void apagaBoton(){
 }
 
 void nuevaSecuencia(){
-  for(int i = 0; i < 5;i++ ){
+  for(int i = 0; i < secuencia.length;i++ ){
     secuencia[i] = int(random(0,5));
   }
-  
+  tamActualSecuencia = 0;
   posicionEnSecuencia = 0;
   //printArray(simonSentence);
   println(join(nf(secuencia, 0), ", "));
