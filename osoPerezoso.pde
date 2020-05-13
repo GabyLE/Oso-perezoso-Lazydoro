@@ -33,7 +33,7 @@ PImage corazonEncendido;
 PImage parlantes;
 //Animacion juguete
 PImage juguete;
-int imgX=109;
+float imgX=109;
 int numCuadros = 20;
 int cuadroActual = 0;
 PImage [] imagenes = new PImage[numCuadros];
@@ -69,7 +69,7 @@ void setup(){
   simonTonos = new SimonTonoGenerador(this); //inicia el sonido
   simonIniciaJuego(); //comienza un nuevo juego
   
-  image(juguete,109,308);
+  
 }
 
 //DIBUJO-CICLO INFINITO
@@ -82,11 +82,19 @@ void draw(){
   //sonidos botones
   simonTonos.checkSuenaTiempo(); //controla el tiempo de duración del sonido de los botones
     
-  if(simonTonos.estaSonando == false)apagaBoton(); //apaga la luz del boton cuando se cumple el tiempo de duración de los botones //<>//
+  if(simonTonos.estaSonando == false)apagaBoton(); //apaga la luz del boton cuando se cumple el tiempo de duración de los botones
   
-  if (turnoSimon) {muestraSecuencia();//si el turno es de Simon muestra la secuencia que el usuario debe repetir
-  caminaJuguete();}
+  if (turnoSimon) {
+    muestraSecuencia();//si el turno es de Simon muestra la secuencia que el usuario debe repetir
+    if((tamActualSecuencia % 2)== 0){
+           imgX = imgX + 0.8;
+           caminaJuguete();
+         }
+    else{image(juguete,imgX,308);}     
+  }
   else{image(juguete,imgX,308);}
+
+
 }//Fin draw
 
 
@@ -165,7 +173,6 @@ void mouseReleased(){
         else{//sino
           tamActualSecuencia++;//suba el nivel, aumenta la secuencia mostrada
           posicionEnSecuencia = 0;//reinicia la posicion en el arreglo
-        
           timeOut = millis() + 1000;//actualiza el periodo de tiempo del 
           turnoSimon = true;//turno de Simon
         }
@@ -189,7 +196,6 @@ void nuevaSecuencia(){//genera una secuencia nueva
   }
   tamActualSecuencia = 0;//inicia el contador del tamaño de la secuencia mostrada o nivel
   posicionEnSecuencia = 0;//inicia el contador de la posicion en la secuencia mostrada
-  avanza = 0;
   imgX = 109;
   //printArray(simonSentence);
   println(join(nf(secuencia, 0), ", "));
@@ -264,12 +270,7 @@ void disenoDispositivo(){
 }
 
 void caminaJuguete(){
-    frameRate(24);
-    if(tamActualSecuencia == avanza + 5){
-           imgX = imgX + 5;
-           cuadroActual = (cuadroActual+1) % numCuadros;
-           image(imagenes[cuadroActual % numCuadros],imgX,308);
-         }
-    else{image(juguete,imgX,308);}
-    
+   frameRate(24);
+   cuadroActual = (cuadroActual+1) % numCuadros;
+   image(imagenes[cuadroActual % numCuadros],imgX,308);
 }
