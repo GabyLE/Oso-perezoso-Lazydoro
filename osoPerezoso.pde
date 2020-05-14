@@ -1,7 +1,7 @@
 /*Aplicación: Presentación demostrativa del juego "OSO PEREZOSO" y componentes (control interactivo) 
   Autor: S.I.M. Soluciones de Ingeniería Mecánica
   Integrantes: Julio Largo, Gabriela López, Camilo Rivera, Sebastian Rivera, Carlos Soto
-  Fecha última modificación: 12/05/2020
+  Fecha última modificación: 14/05/2020
 */
 //DIRECTIVAS
 import javafx.stage.Screen; //se importa recurso para la animación del logo
@@ -32,14 +32,14 @@ PImage cuadradoEncendido;
 PImage corazonEncendido;
 PImage parlantes;
 //Animacion juguete
-PImage juguete;
+PImage jugueteEstatico;
 float imgX=109;
 int numCuadros = 20;
 int cuadroActual = 0;
-PImage [] imagenes = new PImage[numCuadros];
+PImage [] jugueteCamina = new PImage[numCuadros];
 
 //Diseño basico ventana
-Image [] imagen = new Image[5];
+Image [] banner = new Image[5];
 Image titulo;
 PImage fondo;
 
@@ -51,11 +51,11 @@ void setup(){
   //Cargar fuentes texto
   fuentesLetras();
   //Diseño basico ventana
-  imagen[0] = new Image(0,1000,700);//logo SIM
-  imagen[1] = new Image(1,1000,700);//logo SIM
-  imagen[2] = new Image(2,1000,700);//logo SIM
-  imagen[3] = new Image(3,1000,700);//logo UV
-  imagen[4] = new Image(4,0,0);//fondo
+  banner[0] = new Image(0,1000,700);//logo SIM
+  banner[1] = new Image(1,1000,700);//logo SIM
+  banner[2] = new Image(2,1000,700);//logo SIM
+  banner[3] = new Image(3,1000,700);//logo UV
+  banner[4] = new Image(4,0,0);//fondo
   titulo = new Image(0,0,0);
   //carga imagen de fondo
   fondo = loadImage("fondo-arbol.jpg");
@@ -68,8 +68,7 @@ void setup(){
   
   simonTonos = new SimonTonoGenerador(this); //inicia el sonido
   simonIniciaJuego(); //comienza un nuevo juego
-  
-  
+
 }
 
 //DIBUJO-CICLO INFINITO
@@ -86,15 +85,15 @@ void draw(){
   
   if (turnoSimon) {
     muestraSecuencia();//si el turno es de Simon muestra la secuencia que el usuario debe repetir
-    if((tamActualSecuencia % 2)== 0){
-           imgX = imgX + 0.8;
-           caminaJuguete();
-         }
-    else{image(juguete,imgX,308);}     
-  }
-  else{image(juguete,imgX,308);}
-
-
+     //controla cuando avanza el juguete 
+      if((tamActualSecuencia % 4)== 0 && tamActualSecuencia != 0){ //el juguete avanza cada cuatro niveles
+             imgX = imgX + 1;
+             caminaJuguete();
+      }
+      else{image(jugueteEstatico,imgX,308);}     
+   }
+  
+  else{image(jugueteEstatico,imgX,308);}
 }//Fin draw
 
 
@@ -175,14 +174,10 @@ void mouseReleased(){
           posicionEnSecuencia = 0;//reinicia la posicion en el arreglo
           timeOut = millis() + 1000;//actualiza el periodo de tiempo del 
           turnoSimon = true;//turno de Simon
-        }
-        
-        
-      }
-      
+        }     
+      }   
     }
   }
-  
 }
 void apagaBoton(){//apaga luz
   for(Boton botonActual : botones){
@@ -210,11 +205,11 @@ void imagenes(){
   trianguloEncendido = loadImage("triangulo3.png");
   cuadradoEncendido = loadImage("cuadrado3.png");
   corazonEncendido = loadImage("corazon3.png");
-  juguete = loadImage("perro0.png");
+  jugueteEstatico = loadImage("perro0.png");
   for(int i=0; i < numCuadros;i++){
     String nomImg = "perro" +nf(i)+ ".png";
-    imagenes[i] = loadImage(nomImg);
-    imagenes[i].resize(86,0);
+    jugueteCamina[i] = loadImage(nomImg);
+    jugueteCamina[i].resize(86,0);
   }
   
   //Ajuste tamaño imagenes
@@ -225,7 +220,7 @@ void imagenes(){
   corazonEncendido.resize(133,0);
   logo_stamp.resize(37,0);
   parlantes.resize(50,0);
-  juguete.resize(86,0);
+  jugueteEstatico.resize(86,0);
 }
 void fuentesLetras(){
   stamp = createFont("big_noodle_titling.ttf",20);
@@ -233,13 +228,12 @@ void fuentesLetras(){
 }
 void disenoVentana(){
   titulo.cabezote();
-  for(int i=0;i<imagen.length;i++){
-    imagen[i].mostrar(fondo);
+  for(int i=0;i<banner.length;i++){
+    banner[i].mostrar(fondo);
   }
 }
 //Diseño general ventana
 void disenoDispositivo(){
-  //image(juguete,109,308);
   //
   noStroke(); //sin contorno 
   //Carcasa control interactivo
@@ -272,5 +266,5 @@ void disenoDispositivo(){
 void caminaJuguete(){
    frameRate(24);
    cuadroActual = (cuadroActual+1) % numCuadros;
-   image(imagenes[cuadroActual % numCuadros],imgX,308);
+   image(jugueteCamina[cuadroActual % numCuadros],imgX,308);
 }
